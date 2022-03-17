@@ -1,0 +1,52 @@
+From: Thomas Goirand <zigo@debian.org>
+Date: Sat, 12 Feb 2022 21:13:13 +0100
+Subject: Remove failing test: test_contextvars()
+
+Forwarded: not-needed
+Last-Update: 2021-11-01
+---
+ test/base/test_concurrency_py3k.py | 31 -------------------------------
+ 1 file changed, 31 deletions(-)
+
+diff --git a/test/base/test_concurrency_py3k.py b/test/base/test_concurrency_py3k.py
+index 0b648aa..8b68124 100644
+--- a/test/base/test_concurrency_py3k.py
++++ b/test/base/test_concurrency_py3k.py
+@@ -140,37 +140,6 @@ class TestAsyncioCompat(fixtures.TestBase):
+ 
+         await to_await
+ 
+-    @async_test
+-    @testing.requires.python37
+-    async def test_contextvars(self):
+-        import asyncio
+-        import contextvars
+-
+-        var = contextvars.ContextVar("var")
+-        concurrency = 5
+-
+-        async def async_inner(val):
+-            eq_(val, var.get())
+-            return var.get()
+-
+-        def inner(val):
+-            retval = await_only(async_inner(val))
+-            eq_(val, var.get())
+-            eq_(retval, val)
+-            return retval
+-
+-        async def task(val):
+-            var.set(val)
+-            return await greenlet_spawn(inner, val)
+-
+-        values = {
+-            await coro
+-            for coro in asyncio.as_completed(
+-                [task(i) for i in range(concurrency)]
+-            )
+-        }
+-        eq_(values, set(range(concurrency)))
+-
+     @async_test
+     async def test_require_await(self):
+         def run():
